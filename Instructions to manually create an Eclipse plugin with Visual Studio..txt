@@ -1,0 +1,41 @@
+Programming in Eclipse is not like normal programming.
+Eclipse functions as its own compile-on-runtime programming environment.
+As such, "Eclipse Scripts" are not normal executable files, they are libraries, or .dll files. Specifically, Eclipse scripts are saved as esapi.dll files.
+Varian has a sort of permanent hack for how this works. The program executes by calling the "Execute" method of the "Script" class from the Eclipse API.
+For making complex programs, it seems like using Binary plug-ins is the way to go.
+
+We can do this in Visual Studio by creating a new Visual Studio project that will be a Class Library project.
+We will use .NET Framework Class Libraty projects as we are only interested in writing programs for a Windows desktop environment.
+Add References to PresentationFramework, PresentationCore, WindowsBase, and System.Xaml, as well as the ESAPI libraries themselves, VMS.TPS.Common.Model.API and VMS.TPS.Common.Model.Types. 
+Change the project “Platform target” to “x64” to reflect the proper 64-bit architecture.
+At this point, rename the actual C# source file to be whatever you want the script to be called.
+Then, you want to make sure the source file begins with the following standard setup:
+
+
+namespace VMS.TPS
+{
+    public class Script
+    {
+        public void Execute(ScriptContext context, Window window)
+        {
+            // Your code here.
+        }
+    }
+}
+
+After that, open the project’s properties and go to the Application section; add “.esapi” to the Assembly name. This way it will end with esapi.dll.
+
+After you have included the ESAPI libraries, and set up the standard Execute method that you see at the beggining of many of the Varian example scripts, the program will essentially be able to execute itself when Eclipse "compiles" it.
+This sounds very strange because the file we made is actually a library, but this is how programming in Eclipse works.
+This is neccesary because of the severe limitations of single-file plugins.
+
+Single-file plugins can only consist of a single source file. There is no way to load external libraries.
+Any classes you make must be included in that one file.
+
+When a Binary plug-in is loaded into Eclipse, Eclipse loads it and all of its dependent libraries into memory.
+This allows us to make an Eclipse script with the structure of a normal program, execept what we are really doing is making a library that can run itself in Eclipse.
+The drawback of doing this is after the binary plug-in is running, you cannot recompile it or run another plug-in with th same name without closing Eclipse first, because the plugin has been loaded into Eclipses' memory.
+
+
+However, we can use Carlos Andersons' EclipsePlugInRunner to soft test our scripts before testing them in Eclipse.
+More on This later.
